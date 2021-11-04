@@ -135,7 +135,7 @@ class CalendarViewModel: ObservableObject {
     func findFirstDayWeekDay(for date: Date) -> String {
         
         let daySymbol = dateFormatter.shortWeekdaySymbols[Calendar.current.component(.weekday, from: date) - 1]
-        print("--> weekday \(daySymbol)")
+        //print("--> weekday \(daySymbol)")
         
         return daySymbol
     }
@@ -158,7 +158,7 @@ class CalendarViewModel: ObservableObject {
         let date = Calendar.current.date(from: components)
         let daysRange = Calendar.current.range(of: .day, in: .month, for: date!)
         let firstDaySymbol = findFirstDayWeekDay(for: date!)
-        print("week day of 1st - \(firstDaySymbol) \(date!)")
+        //print("week day of 1st - \(firstDaySymbol) \(date!)")
         
         for symbol in dateFormatter.shortWeekdaySymbols {
             if symbol == firstDaySymbol {

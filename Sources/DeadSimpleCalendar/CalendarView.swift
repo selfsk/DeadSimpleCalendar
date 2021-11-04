@@ -27,11 +27,13 @@ public struct CalendarView: View {
     
     @StateObject private var ctrl = CalendarViewModel()
     
-    var getEventsNumber: (_ date: Date?) -> Int = { date in
-        0
+    var getEventsNumber: (_ date: Date?) -> Int
+    var perform: (_ date: Date) -> ()
+    
+    public init(getEventsNumber: @escaping (_ date: Date?) -> Int, perform: @escaping (_ date: Date) -> ()) {
+        self.getEventsNumber = getEventsNumber
+        self.perform = perform
     }
-
-    var perform: (_ date: Date) -> () = { date in }
     
     @ViewBuilder
     func calendarBuilder(_ month: Int) -> some View {
@@ -67,10 +69,8 @@ public struct CalendarView: View {
     }
     
     func getOffset(_ idx: Int, _ width: CGFloat) -> CGFloat {
-
         let offset = CGFloat(ctrl.monthIndex) * width
-        print("Getting offset \(offset)")
-        
+
         return offset
         
     }
