@@ -94,7 +94,6 @@ public struct CalendarView: View {
                     print("previous month")
                     withAnimation {
                         ctrl.goToMonth(-1)
-                        monthChanged(ctrl.monthIndex)
                     }
                 }, label: {
                     Image(systemName: "chevron.left")
@@ -113,7 +112,6 @@ public struct CalendarView: View {
                     print("next month")
                     withAnimation {
                         ctrl.goToMonth(1)
-                        monthChanged(ctrl.monthIndex)
                     }
                 }, label: {
                     Image(systemName: "chevron.right")
@@ -140,6 +138,11 @@ public struct CalendarView: View {
                 .offset(x: -(getOffset(ctrl.monthIndex,itemWidth)))
             }
         }
+        .onChange(of: ctrl.monthIndex, perform: { idx in
+            withAnimation {
+                monthChanged(idx)
+            }
+        })
         .gesture(
             DragGesture()
                 .onChanged({ v in
@@ -155,10 +158,8 @@ public struct CalendarView: View {
                         dragAmount = .zero
                         if abs(dragWidth) > screenWidth/3 && dragWidth < 0 {
                             ctrl.goToMonth(1)
-                            monthChanged(ctrl.monthIndex)
                         } else if dragWidth > screenWidth/3 && dragWidth > 0 {
                             ctrl.goToMonth(-1)
-                            monthChanged(ctrl.monthIndex)
                         }
 
                     }
