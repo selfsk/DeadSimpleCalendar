@@ -142,7 +142,7 @@ class CalendarViewModel: ObservableObject {
     
     func getGridContent(_ monthNumber: Int) -> [CalendarCellData] {
         
-        print("get grid for \(monthNumber)")
+        //print("get grid for \(monthNumber)")
         var out: [CalendarCellData] = []
         for item in dateFormatter.shortWeekdaySymbols {
             out.append(CalendarCellData(body: item))
