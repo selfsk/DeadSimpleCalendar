@@ -30,12 +30,14 @@ public struct CalendarView: View {
     
     var getEventsNumber: (_ date: Date?) -> Int
     var perform: (_ date: Date) -> ()
+    var monthChanged: (_ month: Int) -> ()
     
     @State private var dragAmount: CGSize = .zero
     
-    public init(getEventsNumber: @escaping (_ date: Date?) -> Int, perform: @escaping (_ date: Date) -> ()) {
+    public init(getEventsNumber: @escaping (_ date: Date?) -> Int, perform: @escaping (_ date: Date) -> (), monthChanged: @escaping (_ month: Int) -> ()) {
         self.getEventsNumber = getEventsNumber
         self.perform = perform
+        self.monthChanged = monthChanged
     }
     
     @ViewBuilder
@@ -50,8 +52,9 @@ public struct CalendarView: View {
             ForEach(0..<griditems.count, id: \.self) { idx in
                 let item = griditems[idx]
                 let border = ctrl.isCurrentDate(item.date) ? Color.black : Color.primary.opacity(0)
+                let displayedMonth = ctrl.isDisplayedMonth(item.date)
                 
-                CalendarCellView(data: item, numberOfEvents: ctrl.isDisplayedMonth(item.date) ?  getEventsNumber(item.date) : 0)
+                CalendarCellView(data: item, numberOfEvents: displayedMonth ?  getEventsNumber(item.date) : 0)
                     .onTapGesture {
                         if let selectedDate = item.date {
                             if selectedDate != ctrl.selectedDate {
@@ -66,6 +69,11 @@ public struct CalendarView: View {
                     }
                     .background(ctrl.isSelected(item.date) ? Color.gray.opacity(0.1) : Color.primary.opacity(0))
                     .border(border)
+                    .onAppear {
+                        if displayedMonth {
+                            monthChanged(ctrl.monthIndex)
+                        }
+                    }
                     //.overlay(Rectangle().stroke(Color.black))
                     
             }
@@ -86,6 +94,7 @@ public struct CalendarView: View {
                     print("previous month")
                     withAnimation {
                         ctrl.goToMonth(-1)
+                        monthChanged(ctrl.monthIndex)
                     }
                 }, label: {
                     Image(systemName: "chevron.left")
@@ -104,6 +113,7 @@ public struct CalendarView: View {
                     print("next month")
                     withAnimation {
                         ctrl.goToMonth(1)
+                        monthChanged(ctrl.monthIndex)
                     }
                 }, label: {
                     Image(systemName: "chevron.right")
@@ -145,8 +155,10 @@ public struct CalendarView: View {
                         dragAmount = .zero
                         if abs(dragWidth) > screenWidth/3 && dragWidth < 0 {
                             ctrl.goToMonth(1)
+                            monthChanged(ctrl.monthIndex)
                         } else if dragWidth > screenWidth/3 && dragWidth > 0 {
                             ctrl.goToMonth(-1)
+                            monthChanged(ctrl.monthIndex)
                         }
 
                     }

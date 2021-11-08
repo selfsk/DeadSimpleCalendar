@@ -96,8 +96,6 @@ class CalendarViewModel: ObservableObject {
         let targetDate = cal.dateComponents(components, from: date!)
         let current = cal.dateComponents(components, from: currentDate)
         
-
-        
         let rc =  targetDate.month == current.month &&
             targetDate.year == current.year &&
         targetDate.day == current.day
