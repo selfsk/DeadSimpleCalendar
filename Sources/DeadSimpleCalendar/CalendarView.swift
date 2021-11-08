@@ -79,66 +79,71 @@ public struct CalendarView: View {
     }
     
     public var body: some View {
-            VStack{
-                GeometryReader { geo in
-                    let itemWidth = geo.size.width
-                    HStack{
-                        Button("Prev") {
-                            print("previous month")
-                            withAnimation {
-                                ctrl.goToMonth(-1)
-                            }
-                        }
-                        Spacer()
-                        Button("Today") {
-                            print("go to today")
-                            withAnimation{
-                                ctrl.goToMonth(by: Date())
-                            }
-                        }
-                        Button("Next") {
-                            print("next month")
-                            withAnimation {
-                                ctrl.goToMonth(1)
-                            }
-                        }
+        VStack{
+            HStack{
+                Button("Prev") {
+                    print("previous month")
+                    withAnimation {
+                        ctrl.goToMonth(-1)
                     }
-                    HStack(alignment: .top, spacing: 0){
-                            let m = ctrl.getMonths()
-                            ForEach(m.indices, id: \.self) { month in
-                                VStack{
-                                    Text("\(ctrl.getMonthName(by: month)) \(ctrl.getYear())")
-                                    calendarBuilder(month)
-                                        
-                                }
-                                .padding()
-                                .frame(width: itemWidth)
-                                
-                            }
+                }
+                Spacer()
+                Text("\(ctrl.getCurrentMonth()) \(ctrl.getYear())")
+                Spacer()
+                Button("Today") {
+                    print("go to today")
+                    withAnimation{
+                        ctrl.goToMonth(by: Date())
                     }
-                    .offset(x: -(getOffset(ctrl.monthIndex,itemWidth)))
+                }
+                Button("Next") {
+                    print("next month")
+                    withAnimation {
+                        ctrl.goToMonth(1)
+                    }
                 }
             }
-            .gesture(
-                DragGesture()
-                    .onChanged({ v in
-                        dragAmount = v.translation
-                    })
-                    .onEnded({v in
-                        let screenWidth = UIScreen.main.bounds.width
-                        let dragWidth = dragAmount.width
-                        
-                        withAnimation {
-                            dragAmount = .zero
-                            if abs(dragWidth) > screenWidth/3 && dragWidth < 0 {
-                                ctrl.goToMonth(1)
-                            } else if dragWidth > screenWidth/3 && dragWidth > 0 {
-                                ctrl.goToMonth(-1)
+            GeometryReader { geo in
+                let itemWidth = geo.size.width
+                HStack(alignment: .top, spacing: 0){
+                        let m = ctrl.getMonths()
+                        ForEach(m.indices, id: \.self) { month in
+                            VStack{
+                                //Text("\(ctrl.getMonthName(by: month)) \(ctrl.getYear())")
+                                calendarBuilder(month)
+                                    
                             }
-    
+                            .padding()
+                            .frame(width: itemWidth)
+                            
                         }
-                    })
-            )
+                }
+                .offset(x: -(getOffset(ctrl.monthIndex,itemWidth)))
+            }
+            
+        }
+        .gesture(
+            DragGesture()
+                .onChanged({ v in
+                    dragAmount = v.translation
+                })
+                .onEnded({v in
+                    let screenWidth = UIScreen.main.bounds.width
+                    let dragWidth = dragAmount.width
+                    
+                    //print("gesture drag=\(dragWidth) screen=\(screenWidth)")
+
+                    withAnimation {
+                        dragAmount = .zero
+                        if abs(dragWidth) > screenWidth/3 && dragWidth < 0 {
+                            ctrl.goToMonth(1)
+                        } else if dragWidth > screenWidth/3 && dragWidth > 0 {
+                            ctrl.goToMonth(-1)
+                        }
+
+                    }
+                })
+        )
     }
 
 }
