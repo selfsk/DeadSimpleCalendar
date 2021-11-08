@@ -16,9 +16,10 @@ struct CalendarCellView: View {
         ZStack(alignment: .bottom){
             Text(data.body)
                 .fontWeight(data.isDigit() ? .regular : .bold)
+                .font(.system(size: 14))
             
         }
-        .frame(width: 40, height: 40)
+        .frame(width: 35, height: 35)
         .background(Color.blue.opacity(Double(numberOfEvents) * 0.05))
     }
 }
@@ -81,12 +82,15 @@ public struct CalendarView: View {
     public var body: some View {
         VStack{
             HStack{
-                Button("Prev") {
+                Button(action: {
                     print("previous month")
                     withAnimation {
                         ctrl.goToMonth(-1)
                     }
-                }
+                }, label: {
+                    Image(systemName: "chevron.left")
+                }).disabled(ctrl.monthIndex == 0)
+
                 Spacer()
                 Text("\(ctrl.getCurrentMonth()) \(ctrl.getYear())")
                 Spacer()
@@ -96,13 +100,18 @@ public struct CalendarView: View {
                         ctrl.goToMonth(by: Date())
                     }
                 }
-                Button("Next") {
+                Button(action: {
                     print("next month")
                     withAnimation {
                         ctrl.goToMonth(1)
                     }
-                }
+                }, label: {
+                    Image(systemName: "chevron.right")
+                }).disabled(ctrl.monthIndex == ctrl.months.count - 1)
+                
             }
+            .padding(.horizontal)
+            
             GeometryReader { geo in
                 let itemWidth = geo.size.width
                 HStack(alignment: .top, spacing: 0){
@@ -120,7 +129,6 @@ public struct CalendarView: View {
                 }
                 .offset(x: -(getOffset(ctrl.monthIndex,itemWidth)))
             }
-            
         }
         .gesture(
             DragGesture()
