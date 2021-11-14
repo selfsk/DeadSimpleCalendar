@@ -9,7 +9,7 @@ import Foundation
 
 /* Helper function which generates a mock data that can be used for experiments
  *
- * Creates dictionary with date as key and random number of events for this date.
+ * Creates dictionary with date as key and random number of events for provided year.
  */
 func makeMockData(numberOfDates: Int = 50, year: Int = 2021) -> [Date:Int] {
     
