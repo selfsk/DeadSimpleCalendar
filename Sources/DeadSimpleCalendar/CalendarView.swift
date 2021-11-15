@@ -140,8 +140,7 @@ public struct CalendarView: View {
                 }
                 .offset(x: -(getOffset(ctrl.monthIndex,itemWidth)))
                 
-            }.border(Color.red)
-                .frame(height: CalendarCellStyle.height * Double(ctrl.getNumberOfRows()) ) // 7 - 6 weeks max + control bar
+            }.frame(height: CalendarCellStyle.height * Double(ctrl.getNumberOfRows()) ) // 7 - 6 weeks max + control bar
         }
         .onChange(of: ctrl.monthIndex, perform: { idx in
             withAnimation {

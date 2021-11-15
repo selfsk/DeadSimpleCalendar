@@ -184,7 +184,6 @@ class CalendarViewModel: ObservableObject {
 
         if let num = numberOfRow[monthIndex] {
             let rows = num/7
-            print("number of rows=\(rows)")
             return rows + 1 // +1 for control above calendar
         }
         
