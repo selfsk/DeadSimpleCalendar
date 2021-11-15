@@ -64,3 +64,8 @@ struct YourDeadSimpleCalendarView_Previews: PreviewProvider {
 
 ```
 
+## Demo
+
+![DeadSimpleCalendar Demo](demo/DeadSimpleCalendar-v0.1.gif)
+
+
