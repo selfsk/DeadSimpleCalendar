@@ -126,7 +126,7 @@ public struct CalendarView: View {
                 }).disabled(ctrl.monthIndex == ctrl.months.count - 1)
                 
             }
-            .padding(.init(top: 5, leading: 5, bottom: 0, trailing: 5))
+            .padding([.top, .horizontal])
             
             GeometryReader { geo in
                 let itemWidth = geo.size.width
@@ -138,14 +138,14 @@ public struct CalendarView: View {
                                 calendarBuilder(month)
                                     
                             }
-                            .padding()
+                            .padding(.horizontal)
                             .frame(width: itemWidth)
                             
                         }
                 }
                 .offset(x: -(getOffset(ctrl.monthIndex,itemWidth)))
             }
-            .frame(height: CalendarCellStyle.height * 6 )
+            .frame(height: CalendarCellStyle.height * 6 ) // 7 - 6 weeks max + control bar
         }
         .onChange(of: ctrl.monthIndex, perform: { idx in
             withAnimation {
