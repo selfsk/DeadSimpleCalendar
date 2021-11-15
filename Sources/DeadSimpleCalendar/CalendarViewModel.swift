@@ -27,7 +27,8 @@ class CalendarViewModel: ObservableObject {
     
     var currentDate: Date = Date()
     
-    @Published var calendarItems: [CalendarCellData] = []
+    var numberOfRow: [Int:Int] = [:]
+    
     @Published var selectedDate: Date?
     
     @Published var monthIndex: Int = 0
@@ -174,7 +175,20 @@ class CalendarViewModel: ObservableObject {
             out.append(CalendarCellData(body: String(n), date: temp_date))
         }
         
+        numberOfRow[monthNumber] = out.count
+        
         return out
+    }
+    
+    func getNumberOfRows() -> Int {
+
+        if let num = numberOfRow[monthIndex] {
+            let rows = num/7
+            print("number of rows=\(rows)")
+            return rows + 1 // +1 for control above calendar
+        }
+        
+        return 1
     }
     
 }

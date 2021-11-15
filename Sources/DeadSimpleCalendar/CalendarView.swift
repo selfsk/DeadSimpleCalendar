@@ -126,26 +126,22 @@ public struct CalendarView: View {
                 }).disabled(ctrl.monthIndex == ctrl.months.count - 1)
                 
             }
-            .padding(.init(top: 5, leading: 5, bottom: 0, trailing: 5))
+            .padding([.top, .horizontal])
             
             GeometryReader { geo in
                 let itemWidth = geo.size.width
                 HStack(alignment: .top, spacing: 0){
-                        let m = ctrl.getMonths()
-                        ForEach(m.indices, id: \.self) { month in
-                            VStack{
-                                //Text("\(ctrl.getMonthName(by: month)) \(ctrl.getYear())")
-                                calendarBuilder(month)
-                                    
-                            }
-                            .padding()
+                    let m = ctrl.getMonths()
+                    ForEach(m.indices, id: \.self) { month in
+                        calendarBuilder(month)
                             .frame(width: itemWidth)
-                            
-                        }
+                        
+                    }
                 }
                 .offset(x: -(getOffset(ctrl.monthIndex,itemWidth)))
-            }
-            .frame(height: CalendarCellStyle.height * 6 )
+                
+            }.border(Color.red)
+                .frame(height: CalendarCellStyle.height * Double(ctrl.getNumberOfRows()) ) // 7 - 6 weeks max + control bar
         }
         .onChange(of: ctrl.monthIndex, perform: { idx in
             withAnimation {
