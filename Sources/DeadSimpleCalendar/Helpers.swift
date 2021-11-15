@@ -11,7 +11,7 @@ import Foundation
  *
  * Creates dictionary with date as key and random number of events for provided year.
  */
-func makeMockData(numberOfDates: Int = 50, year: Int = 2021) -> [Date:Int] {
+public func makeMockData(numberOfDates: Int = 50, year: Int = 2021) -> [Date:Int] {
     
     var out: [Date:Int] = [:]
     

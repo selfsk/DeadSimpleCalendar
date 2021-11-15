@@ -17,9 +17,9 @@ import DeadSimpleCalendar
 
 // makeMockData() creates random number of events through provided year -> 2021
 // number of events for day will change highlighting of cell
-let mockEvents = makeMockData()
+let mockEvents = DeadSimpleCalendar.makeMockData()
     
-struct ContentView: View {
+struct YourDeadSimpleCalendarView: View {
     
     
     // selected date (when user taps on date)
@@ -48,18 +48,17 @@ struct ContentView: View {
                     selectedMonth = month
                 }
             )
+            VStack(spacing: 5){
+                Text("Selected month index: \(selectedMonth)")
+                Text("Selected date: \(selectedDate.ISO8601Format())")
+            }.padding()
             Spacer()
-
-            HStack{
-              Text("Selected month index: \(selectedMonth)")
-              Text("Selected date: \(selectedDate)")
-            }
         }
     }
 }
-struct ContentView_Previews: PreviewProvider {
+struct YourDeadSimpleCalendarView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        YourDeadSimpleCalendarView()
     }
 }
 
