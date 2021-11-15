@@ -5,7 +5,9 @@ Package provides a CalendarView which can be used to display simple calendar in 
 You'd have to pass `getEventsNumber` and `perform` functions which will be used to:
   * `getEventsNumbers(Date?)` - will be called for each date cell for currently displaying month
   * `perform(Date)` - will be called on tap of date cell
-  
+  * `monthChanged(Int)` - will be changed when month is scrolled (i.e. changed)
+
+Calendar gets events only for selected month - so if your view model depends on month, use `monthChanged` to update data
 
 # Usage
 
@@ -13,13 +15,18 @@ You'd have to pass `getEventsNumber` and `perform` functions which will be used 
 ```swift
 import DeadSimpleCalendar
 
-let mockEvents = makeMockData()
+// makeMockData() creates random number of events through provided year -> 2021
+// number of events for day will change highlighting of cell
+let mockEvents = DeadSimpleCalendar.makeMockData()
     
-struct ContentView: View {
+struct YourDeadSimpleCalendarView: View {
     
     
-    @State private var showSheet = false
+    // selected date (when user taps on date)
     @State private var selectedDate: Date = Date()
+    
+    // selected month index (0 -> Jan, 11 -> Dec)
+    @State private var selectedMonth: Int = 0
     
     var body: some View {
         VStack{
@@ -34,25 +41,24 @@ struct ContentView: View {
                     return 0
                 },
                 perform: { d in
-                    // we can call showSheet.toggle() here, but there is no guarantee that selectedDate will be updated by the time sheet displayed...
-                    // apparently
                     selectedDate = d
+                },
+                monthChanged: { month in
+                    // can be used to update viewModel to query data for selected month
+                    selectedMonth = month
                 }
             )
-            .onChange(of: selectedDate, perform: { d in
-                showSheet.toggle()
-            })
+            VStack(spacing: 5){
+                Text("Selected month index: \(selectedMonth)")
+                Text("Selected date: \(selectedDate.ISO8601Format())")
+            }.padding()
             Spacer()
-            
-        }
-        .sheet(isPresented: $showSheet) {
-            Text("\(selectedDate)")
         }
     }
 }
-struct ContentView_Previews: PreviewProvider {
+struct YourDeadSimpleCalendarView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        YourDeadSimpleCalendarView()
     }
 }
 

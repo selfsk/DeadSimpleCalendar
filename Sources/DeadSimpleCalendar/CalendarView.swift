@@ -7,6 +7,15 @@
 
 import SwiftUI
 
+struct CalendarCellStyle {
+    
+    static let height: Double = 35
+    static let width: Double = 35
+    
+    static let highlightColor = Color.blue
+    
+}
+
 // handles presentation and actions for one cell in grid
 struct CalendarCellView: View {
     var data: CalendarCellData
@@ -19,8 +28,8 @@ struct CalendarCellView: View {
                 .font(.system(size: 14))
             
         }
-        .frame(width: 35, height: 35)
-        .background(Color.blue.opacity(Double(numberOfEvents) * 0.05))
+        .frame(width: CalendarCellStyle.width, height: CalendarCellStyle.height)
+        .background(CalendarCellStyle.highlightColor.opacity(Double(numberOfEvents) * 0.05))
     }
 }
 
@@ -64,7 +73,6 @@ public struct CalendarView: View {
                             //print("Selected date \(selectedDate)")
                             ctrl.selectDate(selectedDate)
                             
-                            //TODO: implement perform callback
                         }
                     }
                     .background(ctrl.isSelected(item.date) ? Color.gray.opacity(0.1) : Color.primary.opacity(0))
@@ -118,7 +126,7 @@ public struct CalendarView: View {
                 }).disabled(ctrl.monthIndex == ctrl.months.count - 1)
                 
             }
-            .padding(.horizontal)
+            .padding()
             
             GeometryReader { geo in
                 let itemWidth = geo.size.width
@@ -137,6 +145,7 @@ public struct CalendarView: View {
                 }
                 .offset(x: -(getOffset(ctrl.monthIndex,itemWidth)))
             }
+            .frame(height: CalendarCellStyle.height * 6 )
         }
         .onChange(of: ctrl.monthIndex, perform: { idx in
             withAnimation {
@@ -152,8 +161,6 @@ public struct CalendarView: View {
                     let screenWidth = UIScreen.main.bounds.width
                     let dragWidth = dragAmount.width
                     
-                    //print("gesture drag=\(dragWidth) screen=\(screenWidth)")
-
                     withAnimation {
                         dragAmount = .zero
                         if abs(dragWidth) > screenWidth/3 && dragWidth < 0 {
