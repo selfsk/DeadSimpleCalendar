@@ -126,7 +126,7 @@ public struct CalendarView: View {
                 }).disabled(ctrl.monthIndex == ctrl.months.count - 1)
                 
             }
-            .padding()
+            .padding(.init(top: 5, leading: 5, bottom: 0, trailing: 5))
             
             GeometryReader { geo in
                 let itemWidth = geo.size.width
