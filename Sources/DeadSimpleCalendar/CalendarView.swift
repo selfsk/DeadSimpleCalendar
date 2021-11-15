@@ -131,21 +131,17 @@ public struct CalendarView: View {
             GeometryReader { geo in
                 let itemWidth = geo.size.width
                 HStack(alignment: .top, spacing: 0){
-                        let m = ctrl.getMonths()
-                        ForEach(m.indices, id: \.self) { month in
-                            VStack{
-                                //Text("\(ctrl.getMonthName(by: month)) \(ctrl.getYear())")
-                                calendarBuilder(month)
-                                    
-                            }
-                            .padding(.horizontal)
+                    let m = ctrl.getMonths()
+                    ForEach(m.indices, id: \.self) { month in
+                        calendarBuilder(month)
                             .frame(width: itemWidth)
-                            
-                        }
+                        
+                    }
                 }
                 .offset(x: -(getOffset(ctrl.monthIndex,itemWidth)))
-            }
-            .frame(height: CalendarCellStyle.height * 6 ) // 7 - 6 weeks max + control bar
+                
+            }.border(Color.red)
+                .frame(height: CalendarCellStyle.height * Double(ctrl.getNumberOfRows()) ) // 7 - 6 weeks max + control bar
         }
         .onChange(of: ctrl.monthIndex, perform: { idx in
             withAnimation {
