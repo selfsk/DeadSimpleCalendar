@@ -29,24 +29,32 @@ class CalendarViewModel: ObservableObject {
     
     var numberOfRow: [Int:Int] = [:]
     
+    // container year number (2022, 2017, 1983, etc.) we are displaying
+    @Published var yearNumber: Int?
+    
+    // will store date we tap on calendar
     @Published var selectedDate: Date?
     
+    // store current month index (0 - Jan, 11 - Dec) we're displaying
     @Published var monthIndex: Int = 0
 
     let dateFormatter = DateFormatter()
     
     var months: [String] = []
-
     
     let cal = Calendar.current
     
     init() {
         months = dateFormatter.monthSymbols
         
+        // init year number to our current date - "Today"
+        yearNumber = getCurrentYear()
+        
         let month = getMonthName()
         monthIndex = months.firstIndex(of: month) ?? 0
     }
     
+    // update monthIndex according to provided Date
     func goToMonth(by date: Date) {
         let mn = cal.component(.month, from: date)
         
@@ -56,8 +64,8 @@ class CalendarViewModel: ObservableObject {
     func getMonths() -> [String] {
         months
     }
-    
-    func getCurrentMonth() -> String {
+        
+    func getCurrentPresentingMonth() -> String {
         return months[monthIndex]
     }
     
@@ -89,6 +97,7 @@ class CalendarViewModel: ObservableObject {
             targetDate.month == monthIndex + 1
     }
     
+    // returns true if date is a "Today", compares month, year and day
     func isCurrentDate(_ date: Date?) -> Bool {
         guard date != nil else { return false }
         
@@ -109,11 +118,14 @@ class CalendarViewModel: ObservableObject {
         
         return selectedDate! == date
     }
+        
+    func getCurrentYear() -> Int {
+        let y = cal.component(.year, from: currentDate)
+        return y
+    }
     
     func getYear() -> String {
-        let y = cal.component(.year, from: currentDate)
-        
-        return String(y)
+        return String(getCurrentYear())
     }
     
     func getMonthName() -> String {
@@ -122,15 +134,24 @@ class CalendarViewModel: ObservableObject {
         return ms
     }
     
-    func goToMonth(_ step: Int) {
-        print("Move to month with step=\(step)")
-        if step < 0 && monthIndex > 0 {
-            monthIndex -= 1
-        } else if step > 0 && monthIndex < (months.count - 1) {
-            monthIndex += 1
+    func goToMonth(name: String) {
+        if let idx = months.firstIndex(of: name) {
+            monthIndex = idx
         }
     }
     
+    func goToMonth(_ step: Int) {
+        print("Move to month with step=\(step)")
+        if step < 0 && monthIndex > 0 {
+            monthIndex -= abs(step)
+        } else if step > 0 && monthIndex < (months.count - 1) {
+            monthIndex += step
+        }
+    }
+    
+    func goToYear(_ year: Int) {
+        yearNumber = year
+    }
     func findFirstDayWeekDay(for date: Date) -> String {
         
         let daySymbol = dateFormatter.shortWeekdaySymbols[Calendar.current.component(.weekday, from: date) - 1]
@@ -148,13 +169,15 @@ class CalendarViewModel: ObservableObject {
         }
 
         // find weekday for first day of month
-        var components = Calendar.current.dateComponents([.year], from: currentDate)
+        var components = Calendar.current.dateComponents([], from: currentDate)
         components.hour = 0
         components.minute = 0
         components.day = 1
         components.month = monthNumber + 1
+        components.year = yearNumber
         
         let date = Calendar.current.date(from: components)
+        
         let daysRange = Calendar.current.range(of: .day, in: .month, for: date!)
         let firstDaySymbol = findFirstDayWeekDay(for: date!)
         //print("week day of 1st - \(firstDaySymbol) \(date!)")

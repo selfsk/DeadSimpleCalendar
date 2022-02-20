@@ -41,6 +41,9 @@ public struct CalendarView: View {
     var perform: (_ date: Date) -> ()
     var monthChanged: (_ month: Int) -> ()
     
+    @State private var currentPresentYear: Int = 0
+    @State private var currentPresentMonth: String = ""
+    
     @State private var dragAmount: CGSize = .zero
     
     public init(getEventsNumber: @escaping (_ date: Date?) -> Int, perform: @escaping (_ date: Date) -> (), monthChanged: @escaping (_ month: Int) -> ()) {
@@ -108,12 +111,38 @@ public struct CalendarView: View {
                 }).disabled(ctrl.monthIndex == 0)
 
                 Spacer()
-                Text("\(ctrl.getCurrentMonth()) \(ctrl.getYear())")
+                Picker(currentPresentMonth, selection: $currentPresentMonth, content: {
+                    ForEach(ctrl.months, id: \.self) { m in
+                        Text(m)
+                    }
+                }).onChange(of: currentPresentMonth, perform: { val in
+                    print("new month: \(val)")
+                    withAnimation {
+                        ctrl.goToMonth(name: val)
+                    }
+                })
+
+                let startYear = ctrl.getCurrentYear() - 5
+                let endYear = ctrl.getCurrentYear()
+                
+                Picker(String(currentPresentYear), selection: $currentPresentYear, content: {
+                    ForEach(startYear...endYear, id: \.self) { year in
+                        Text(String(year))
+                            .tag(year)
+                    }
+                }).onChange(of: currentPresentYear, perform: { val in
+                    print("new year: \(val)")
+                    withAnimation {
+                        ctrl.goToYear(val)
+                    }
+                })
+                
                 Spacer()
                 Button("Today") {
                     print("go to today")
                     withAnimation{
                         ctrl.goToMonth(by: Date())
+                        currentPresentYear = ctrl.getCurrentYear()
                     }
                 }
                 Button(action: {
@@ -127,6 +156,10 @@ public struct CalendarView: View {
                 
             }
             .padding([.top, .horizontal])
+            .onAppear(perform: {
+                currentPresentYear = ctrl.getCurrentYear()
+                currentPresentMonth = ctrl.getMonthName()
+            })
             
             GeometryReader { geo in
                 let itemWidth = geo.size.width
@@ -146,6 +179,9 @@ public struct CalendarView: View {
             withAnimation {
                 monthChanged(idx)
             }
+            
+            // update view state for month we're presenting
+            currentPresentMonth = ctrl.getCurrentPresentingMonth()
         })
         .gesture(
             DragGesture()
