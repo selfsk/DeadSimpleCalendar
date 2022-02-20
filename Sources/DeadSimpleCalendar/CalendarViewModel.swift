@@ -118,7 +118,7 @@ class CalendarViewModel: ObservableObject {
         
         return selectedDate! == date
     }
-        
+    
     func getCurrentYear() -> Int {
         let y = cal.component(.year, from: currentDate)
         return y

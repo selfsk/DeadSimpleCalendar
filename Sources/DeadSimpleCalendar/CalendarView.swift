@@ -33,6 +33,15 @@ struct CalendarCellView: View {
     }
 }
 
+// calendar configuration, for now stores only range for years
+public struct DeadSimpleCalendarConfiguration {
+    var yearRange: ClosedRange<Int>
+
+    public init(yearRange: ClosedRange<Int>) {
+        self.yearRange = yearRange
+    }
+}
+
 public struct CalendarView: View {
     
     @StateObject private var ctrl = CalendarViewModel()
@@ -41,15 +50,32 @@ public struct CalendarView: View {
     var perform: (_ date: Date) -> ()
     var monthChanged: (_ month: Int) -> ()
     
-    @State private var currentPresentYear: Int = 0
-    @State private var currentPresentMonth: String = ""
+    var configuration: DeadSimpleCalendarConfiguration
+    /*
+     okay, this strange numbers requires some clarification:
+     
+     Apparently in iOS14 can not figure out layout for Text() showing this state values, if they are different "length". Using dummy values, just to make layout happy.
+     Values will be updated with .onAppear() handler
+    */
+    @State private var currentPresentYear: Int = 9999
+    @State private var currentPresentMonth: String = "MonthName"
     
     @State private var dragAmount: CGSize = .zero
     
-    public init(getEventsNumber: @escaping (_ date: Date?) -> Int, perform: @escaping (_ date: Date) -> (), monthChanged: @escaping (_ month: Int) -> ()) {
+    public init(getEventsNumber: @escaping (_ date: Date?) -> Int, perform: @escaping (_ date: Date) -> (), monthChanged: @escaping (_ month: Int) -> (), configuration: DeadSimpleCalendarConfiguration? = nil) {
         self.getEventsNumber = getEventsNumber
         self.perform = perform
         self.monthChanged = monthChanged
+        
+        if let providedConfiguration = configuration {
+            self.configuration = providedConfiguration
+        } else {
+            // init default configuration
+            let endYear = getYearFromDate(Date())
+            let startYear = endYear - 5 // go back 5 years, should be enough for most cases, right? :)
+            self.configuration = DeadSimpleCalendarConfiguration(yearRange: startYear...endYear)
+        }
+            
     }
     
     @ViewBuilder
@@ -111,29 +137,28 @@ public struct CalendarView: View {
                 }).disabled(ctrl.monthIndex == 0)
 
                 Spacer()
+            
                 Picker(currentPresentMonth, selection: $currentPresentMonth, content: {
                     ForEach(ctrl.months, id: \.self) { m in
                         Text(m)
                     }
-                }).pickerStyle(.menu)
+                })
+                    .pickerStyle(.menu)
                     .onChange(of: currentPresentMonth, perform: { val in
-                    print("new month: \(val)")
+                    //print("new month: \(val)")
                     withAnimation {
                         ctrl.goToMonth(name: val)
                     }
                 })
-
-                let startYear = ctrl.getCurrentYear() - 5
-                let endYear = ctrl.getCurrentYear()
                 
                 Picker(String(currentPresentYear), selection: $currentPresentYear, content: {
-                    ForEach(startYear...endYear, id: \.self) { year in
+                    ForEach(configuration.yearRange, id: \.self) { year in
                         Text(String(year))
                             .tag(year)
                     }
                 }).pickerStyle(.menu)
                     .onChange(of: currentPresentYear, perform: { val in
-                        print("new year: \(val)")
+                        //print("selected year: \(val)")
                         withAnimation {
                             ctrl.goToYear(val)
                         }
@@ -141,14 +166,15 @@ public struct CalendarView: View {
                 
                 Spacer()
                 Button("Today") {
-                    print("go to today")
+                    //print("go to today")
                     withAnimation{
                         ctrl.goToMonth(by: Date())
                         currentPresentYear = ctrl.getCurrentYear()
                     }
                 }
+                
                 Button(action: {
-                    print("next month")
+                    //print("next month")
                     withAnimation {
                         ctrl.goToMonth(1)
                     }

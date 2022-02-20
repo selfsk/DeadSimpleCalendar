@@ -29,6 +29,7 @@ struct YourDeadSimpleCalendarView: View {
     @State private var selectedMonth: Int = 0
     
     var body: some View {
+        let currentYear = DeadSimpleCalendar.getYearFromDate(Date())
         VStack{
             CalendarView(
                 getEventsNumber: { date in
@@ -46,16 +47,19 @@ struct YourDeadSimpleCalendarView: View {
                 monthChanged: { month in
                     // can be used to update viewModel to query data for selected month
                     selectedMonth = month
-                }
-            )
+                },
+                configuration: DeadSimpleCalendarConfiguration(yearRange: (currentYear - 5)...(currentYear + 5))
+            )//.border(Color.black)
+
             VStack(spacing: 5){
                 Text("Selected month index: \(selectedMonth)")
-                Text("Selected date: \(selectedDate.ISO8601Format())")
+                Text("Selected date: \(selectedDate)")
             }.padding()
             Spacer()
         }
     }
 }
+
 struct YourDeadSimpleCalendarView_Previews: PreviewProvider {
     static var previews: some View {
         YourDeadSimpleCalendarView()
@@ -64,8 +68,12 @@ struct YourDeadSimpleCalendarView_Previews: PreviewProvider {
 
 ```
 
+## Configuration
+
+You can pass different configruration(`DeadSimpleCalendarConfiguration`) to CalendarView. For now it supports only `yearRange` for "year" selection picker. In future I'm thinking to manage style through this struct as well.
+
 ## Demo
 
-![DeadSimpleCalendar Demo](demo/DeadSimpleCalendar-v0.1.gif)
+![DeadSimpleCalendar Demo](demo/DeadSimpleCalendar-demo.gif)
 
 
