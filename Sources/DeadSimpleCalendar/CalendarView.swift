@@ -115,7 +115,8 @@ public struct CalendarView: View {
                     ForEach(ctrl.months, id: \.self) { m in
                         Text(m)
                     }
-                }).onChange(of: currentPresentMonth, perform: { val in
+                }).pickerStyle(.menu)
+                    .onChange(of: currentPresentMonth, perform: { val in
                     print("new month: \(val)")
                     withAnimation {
                         ctrl.goToMonth(name: val)
@@ -130,12 +131,13 @@ public struct CalendarView: View {
                         Text(String(year))
                             .tag(year)
                     }
-                }).onChange(of: currentPresentYear, perform: { val in
-                    print("new year: \(val)")
-                    withAnimation {
-                        ctrl.goToYear(val)
-                    }
-                })
+                }).pickerStyle(.menu)
+                    .onChange(of: currentPresentYear, perform: { val in
+                        print("new year: \(val)")
+                        withAnimation {
+                            ctrl.goToYear(val)
+                        }
+                    })
                 
                 Spacer()
                 Button("Today") {
