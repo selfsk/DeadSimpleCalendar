@@ -29,3 +29,9 @@ public func makeMockData(numberOfDates: Int = 50, year: Int = 2021) -> [Date:Int
     
     return out
 }
+
+//static version for getCurrentYear, always uses today as date
+public func getYearFromDate(_ date: Date) -> Int {
+    let y = Calendar.current.component(.year, from: date)
+    return y
+}
