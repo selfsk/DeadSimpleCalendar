@@ -92,6 +92,10 @@ You can pass different configruration(`DeadSimpleCalendarConfiguration`) to Cale
 
 ## Demo
 
-![DeadSimpleCalendar Demo](demo/DeadSimpleCalendar-demo.gif)
+### Light Mode
+![DeadSimpleCalendar Demo (light mode)](demo/light-mode-demo.gif)
+
+### Dark Mode
+![DeadSimpleCalendar Demo (dark mode)](demo/dark-mode-demo.gif)
 
 
