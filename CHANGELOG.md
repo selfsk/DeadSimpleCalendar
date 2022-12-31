@@ -1,12 +1,21 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+
+<a name="v0.2"></a>
+## [v0.2] - 2022-12-30
+### Chore
+- changelog updated
+
 ### Doc
 - Updated demo gifs
 - Updated description and example
 
 ### Feat
 - Added month/year view + dark mode
+
+### Pull Requests
+- Merge pull request [#6](https://github.com/selfsk/DeadSimpleCalendar/issues/6) from selfsk/feature-year-view
 
 
 <a name="v0.1"></a>
@@ -28,5 +37,6 @@
 - left/right chevron padding, 0 at bottom now
 
 
-[Unreleased]: https://github.com/selfsk/DeadSimpleCalendar/compare/v0.1...HEAD
+[Unreleased]: https://github.com/selfsk/DeadSimpleCalendar/compare/v0.2...HEAD
+[v0.2]: https://github.com/selfsk/DeadSimpleCalendar/compare/v0.1...v0.2
 [v0.1]: https://github.com/selfsk/DeadSimpleCalendar/compare/pre-v0.1...v0.1
