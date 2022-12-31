@@ -1,6 +1,13 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+### Doc
+- Updated demo gifs
+- Updated description and example
+
+### Feat
+- Added month/year view + dark mode
+
 
 <a name="v0.1"></a>
 ## [v0.1] - 2022-02-20

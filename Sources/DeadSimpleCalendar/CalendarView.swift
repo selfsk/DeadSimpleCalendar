@@ -12,8 +12,11 @@ struct CalendarCellStyle {
     static let height: Double = 35
     static let width: Double = 35
     
-    static let highlightColor = Color.blue
+    static let highlightColor = Color(UIColor.systemCyan)
+    static let todayHighlighColor = Color(UIColor.systemBlue)
+    static let selectedDayHighlighColor = Color(UIColor.systemBlue)
     
+    static let opacityFactor = 0.2
 }
 
 // handles presentation and actions for one cell in grid
@@ -22,17 +25,44 @@ struct CalendarCellView: View {
     var numberOfEvents: Int
     
     var body: some View {
-        ZStack(alignment: .bottom){
+        ZStack{
+            RoundedRectangle(cornerRadius: 5)
+                .fill(numberOfEvents > 0 ?
+                      CalendarCellStyle.highlightColor.opacity(Double(numberOfEvents) * CalendarCellStyle.opacityFactor)
+                      : Color(UIColor.systemBackground))
+            
             Text(data.body)
                 .fontWeight(data.isDigit() ? .regular : .bold)
                 .font(.system(size: 14))
             
         }
         .frame(width: CalendarCellStyle.width, height: CalendarCellStyle.height)
-        .background(CalendarCellStyle.highlightColor.opacity(Double(numberOfEvents) * 0.05))
     }
 }
 
+struct CalendarMonthSummaryView: View {
+    
+    var month: String
+    var numberOfEvents: Int
+    
+    var body: some View {
+        ZStack{
+            RoundedRectangle(cornerRadius: 5)
+                .fill(numberOfEvents > 0 ?
+                      CalendarCellStyle.highlightColor.opacity(Double(numberOfEvents) * CalendarCellStyle.opacityFactor)
+                      : Color(UIColor.systemBackground))
+            VStack(alignment: .center){
+                Text(month)
+                    .lineLimit(1)
+                Text("\(numberOfEvents)")
+                    .fontWeight(.thin)
+                    .lineLimit(1)
+                
+            }
+        }
+        .frame(width: 110, height: 50)
+    }
+}
 // calendar configuration, for now stores only range for years
 public struct DeadSimpleCalendarConfiguration {
     var yearRange: ClosedRange<Int>
@@ -42,28 +72,34 @@ public struct DeadSimpleCalendarConfiguration {
     }
 }
 
+enum CalendarMode: String, CaseIterable {
+    case month, year
+}
+
 public struct CalendarView: View {
     
     @StateObject private var ctrl = CalendarViewModel()
     
     var getEventsNumber: (_ date: Date?) -> Int
+    var getEventsNumberInMonth: (_ month: Int, _ year: Int) -> Int
     var perform: (_ date: Date) -> ()
     var monthChanged: (_ month: Int) -> ()
     
     var configuration: DeadSimpleCalendarConfiguration
-    /*
-     okay, this strange numbers requires some clarification:
-     
-     Apparently in iOS14 can not figure out layout for Text() showing this state values, if they are different "length". Using dummy values, just to make layout happy.
-     Values will be updated with .onAppear() handler
-    */
-    @State private var currentPresentYear: Int = 9999
-    @State private var currentPresentMonth: String = "MonthName"
+    
+    @State private var currentPresentYear: Int = 0
+    @State private var currentPresentMonth: String = ""
     
     @State private var dragAmount: CGSize = .zero
+    @State private var calendarMode: CalendarMode = .month
     
-    public init(getEventsNumber: @escaping (_ date: Date?) -> Int, perform: @escaping (_ date: Date) -> (), monthChanged: @escaping (_ month: Int) -> (), configuration: DeadSimpleCalendarConfiguration? = nil) {
+    public init(getEventsNumber: @escaping (_ date: Date?) -> Int,
+                getEventsNumberInMonth: @escaping (_ month: Int, _ year: Int) -> Int,
+                perform: @escaping (_ date: Date) -> (),
+                monthChanged: @escaping (_ month: Int) -> (),
+                configuration: DeadSimpleCalendarConfiguration? = nil) {
         self.getEventsNumber = getEventsNumber
+        self.getEventsNumberInMonth = getEventsNumberInMonth
         self.perform = perform
         self.monthChanged = monthChanged
         
@@ -79,6 +115,24 @@ public struct CalendarView: View {
     }
     
     @ViewBuilder
+    func calendarYearViewBuilder() -> some View {
+        let columns = [0,1,2].map{ _ in GridItem(spacing: 0)}
+        
+        LazyVGrid(columns: columns, spacing: 1, content: {
+            ForEach(Array(ctrl.months.enumerated()), id: \.element ) { month_idx, month_name in
+                CalendarMonthSummaryView(month: month_name,
+                                         numberOfEvents: getEventsNumberInMonth(month_idx, currentPresentYear))
+                .onTapGesture {
+                    withAnimation {
+                        ctrl.monthIndex = month_idx
+                        calendarMode = .month
+                    }
+                }
+            }
+        })
+    }
+    
+    @ViewBuilder
     func calendarBuilder(_ month: Int) -> some View {
         let columns = ctrl.getWeekDays().map {_ in
             GridItem(spacing: 0)
@@ -86,10 +140,10 @@ public struct CalendarView: View {
         
         let griditems = ctrl.getGridContent(month)
         
-        LazyVGrid(columns: columns, spacing: 0, content: {
+        LazyVGrid(columns: columns, spacing: 1, content: {
             ForEach(0..<griditems.count, id: \.self) { idx in
                 let item = griditems[idx]
-                let border = ctrl.isCurrentDate(item.date) ? Color.black : Color.primary.opacity(0)
+                let border = ctrl.isCurrentDate(item.date) ? CalendarCellStyle.todayHighlighColor : Color.primary.opacity(0)
                 let displayedMonth = ctrl.isDisplayedMonth(item.date)
                 
                 CalendarCellView(data: item, numberOfEvents: displayedMonth ?  getEventsNumber(item.date) : 0)
@@ -99,20 +153,16 @@ public struct CalendarView: View {
                                 print("Selecting new date \(selectedDate)")
                                 perform(selectedDate)
                             }
-                            //print("Selected date \(selectedDate)")
                             ctrl.selectDate(selectedDate)
                             
                         }
                     }
-                    .background(ctrl.isSelected(item.date) ? Color.gray.opacity(0.1) : Color.primary.opacity(0))
-                    .border(border)
+                    .border(!ctrl.isSelected(item.date) ? border : CalendarCellStyle.selectedDayHighlighColor)
                     .onAppear {
                         if displayedMonth {
                             monthChanged(ctrl.monthIndex)
                         }
                     }
-                    //.overlay(Rectangle().stroke(Color.black))
-                    
             }
         })
     }
@@ -135,34 +185,8 @@ public struct CalendarView: View {
                 }, label: {
                     Image(systemName: "chevron.left")
                 }).disabled(ctrl.monthIndex == 0)
-
-                Spacer()
-            
-                Picker(currentPresentMonth, selection: $currentPresentMonth, content: {
-                    ForEach(ctrl.months, id: \.self) { m in
-                        Text(m)
-                    }
-                })
-                    .pickerStyle(.menu)
-                    .onChange(of: currentPresentMonth, perform: { val in
-                    //print("new month: \(val)")
-                    withAnimation {
-                        ctrl.goToMonth(name: val)
-                    }
-                })
                 
-                Picker(String(currentPresentYear), selection: $currentPresentYear, content: {
-                    ForEach(configuration.yearRange, id: \.self) { year in
-                        Text(String(year))
-                            .tag(year)
-                    }
-                }).pickerStyle(.menu)
-                    .onChange(of: currentPresentYear, perform: { val in
-                        //print("selected year: \(val)")
-                        withAnimation {
-                            ctrl.goToYear(val)
-                        }
-                    })
+                Spacer()
                 
                 Spacer()
                 Button("Today") {
@@ -170,6 +194,7 @@ public struct CalendarView: View {
                     withAnimation{
                         ctrl.goToMonth(by: Date())
                         currentPresentYear = ctrl.getCurrentYear()
+                        calendarMode = .month
                     }
                 }
                 
@@ -189,19 +214,64 @@ public struct CalendarView: View {
                 currentPresentMonth = ctrl.getMonthName()
             })
             
-            GeometryReader { geo in
-                let itemWidth = geo.size.width
-                HStack(alignment: .top, spacing: 0){
-                    let m = ctrl.getMonths()
-                    ForEach(m.indices, id: \.self) { month in
-                        calendarBuilder(month)
-                            .frame(width: itemWidth)
-                        
+            HStack{
+                Picker(currentPresentMonth, selection: $currentPresentMonth, content: {
+                    ForEach(ctrl.months, id: \.self) { m in
+                        Text(m)
+                            .tag(m)
                     }
+                })
+                .frame(minWidth: 100)
+                .pickerStyle(.menu)
+                .onChange(of: currentPresentMonth, perform: { val in
+                    //print("new month: \(val)")
+                    withAnimation {
+                        ctrl.goToMonth(name: val)
+                    }
+                })
+                
+                Spacer()
+                Button("\(calendarMode.rawValue.capitalized)") {
+                    calendarMode = calendarMode == .month ? .year : .month
                 }
-                .offset(x: -(getOffset(ctrl.monthIndex,itemWidth)))
+                
+                Spacer()
+                Picker(String(currentPresentYear), selection: $currentPresentYear, content: {
+                    ForEach(configuration.yearRange, id: \.self) { year in
+                        Text(String(year))
+                            .tag(year)
+                    }
+                })
+                
+                .pickerStyle(.menu)
+                .onChange(of: currentPresentYear, perform: { val in
+                    //print("selected year: \(val)")
+                    withAnimation {
+                        ctrl.goToYear(val)
+                    }
+                })
+                
+            }
+            .padding([.horizontal])
+            
+            GeometryReader { geo in
+                if calendarMode == .month {
+                    let itemWidth = geo.size.width
+                    HStack(alignment: .top, spacing: 0){
+                        let m = ctrl.getMonths()
+                        ForEach(m.indices, id: \.self) { month in
+                            calendarBuilder(month)
+                                .frame(width: itemWidth)
+                            
+                        }
+                    }
+                    .offset(x: -(getOffset(ctrl.monthIndex,itemWidth)))
+                } else if calendarMode == .year {
+                    calendarYearViewBuilder()
+                }
                 
             }.frame(height: CalendarCellStyle.height * Double(ctrl.getNumberOfRows()) ) // 7 - 6 weeks max + control bar
+            
         }
         .onChange(of: ctrl.monthIndex, perform: { idx in
             withAnimation {
