@@ -119,11 +119,10 @@ public struct CalendarView: View {
         let columns = [0,1,2].map{ _ in GridItem(spacing: 0)}
         
         LazyVGrid(columns: columns, spacing: 1, content: {
-            ForEach(ctrl.months.indices, id: \.self) { month_idx in
-                CalendarMonthSummaryView(month: ctrl.months[month_idx],
+            ForEach(Array(ctrl.months.enumerated()), id: \.element ) { month_idx, month_name in
+                CalendarMonthSummaryView(month: month_name,
                                          numberOfEvents: getEventsNumberInMonth(month_idx, currentPresentYear))
                 .onTapGesture {
-                    
                     withAnimation {
                         ctrl.monthIndex = month_idx
                         calendarMode = .month
@@ -255,25 +254,23 @@ public struct CalendarView: View {
             }
             .padding([.horizontal])
             
-            
-            
-                GeometryReader { geo in
-                    if calendarMode == .month {
-                        let itemWidth = geo.size.width
-                        HStack(alignment: .top, spacing: 0){
-                            let m = ctrl.getMonths()
-                            ForEach(m.indices, id: \.self) { month in
-                                calendarBuilder(month)
-                                    .frame(width: itemWidth)
-                                
-                            }
+            GeometryReader { geo in
+                if calendarMode == .month {
+                    let itemWidth = geo.size.width
+                    HStack(alignment: .top, spacing: 0){
+                        let m = ctrl.getMonths()
+                        ForEach(m.indices, id: \.self) { month in
+                            calendarBuilder(month)
+                                .frame(width: itemWidth)
+                            
                         }
-                        .offset(x: -(getOffset(ctrl.monthIndex,itemWidth)))
-                    } else if calendarMode == .year {
-                        calendarYearViewBuilder()
                     }
-                    
-                }.frame(height: CalendarCellStyle.height * Double(ctrl.getNumberOfRows()) ) // 7 - 6 weeks max + control bar
+                    .offset(x: -(getOffset(ctrl.monthIndex,itemWidth)))
+                } else if calendarMode == .year {
+                    calendarYearViewBuilder()
+                }
+                
+            }.frame(height: CalendarCellStyle.height * Double(ctrl.getNumberOfRows()) ) // 7 - 6 weeks max + control bar
             
         }
         .onChange(of: ctrl.monthIndex, perform: { idx in
